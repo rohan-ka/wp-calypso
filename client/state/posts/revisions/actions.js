@@ -71,3 +71,10 @@ export const receivePostRevisions = ( siteId, postId, revisions ) => ( {
 	postId,
 	revisions,
 } );
+
+export const selectPostRevision = ( siteId, basePostId, postId ) => ( {
+	type: 'POST_REVISIONS_SELECT',
+	basePostId,
+	siteId,
+	postId,
+} );

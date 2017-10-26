@@ -4,7 +4,7 @@
  * @format
  */
 
-import { keyBy, merge } from 'lodash';
+import { get, head, keyBy, merge, nth } from 'lodash';
 
 /**
  * Internal dependencies
@@ -47,7 +47,29 @@ export function revisions( state = {}, action ) {
 	return state;
 }
 
+// @TODO ensure no rehydration
+export function selection( state = {}, action ) {
+	switch ( action.type ) {
+		case 'POST_REVISIONS_SELECT': {
+			const { basePostId, siteId, postId } = action;
+
+			// @TODO use selector
+			const _revisions = get( state, 'posts.revisions.revisions', [] );
+
+			return {
+				...state,
+				basePostId: basePostId || head( _revisions ),
+				siteId,
+				postId: ( postId > basePostId && basePostId ) || nth( _revisions, 1 ),
+			};
+		}
+		default:
+			return state;
+	}
+}
+
 export default combineReducers( {
 	requesting,
 	revisions,
+	selection,
 } );

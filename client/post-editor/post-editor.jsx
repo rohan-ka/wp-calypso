@@ -41,6 +41,7 @@ import analytics from 'lib/analytics';
 import { getSelectedSiteId, getSelectedSite } from 'state/ui/selectors';
 import { saveConfirmationSidebarPreference } from 'state/ui/editor/actions';
 import { setEditorLastDraft, resetEditorLastDraft } from 'state/ui/editor/last-draft/actions';
+import { selectPostRevision } from 'state/posts/revisions/actions';
 import {
 	getEditorPostId,
 	getEditorPath,
@@ -290,9 +291,7 @@ export const PostEditor = createReactClass( {
 
 	selectRevision: function( selectedRevisionId ) {
 		this.setState( { selectedRevisionId } );
-		if ( selectedRevisionId !== null && isWithinBreakpoint( '<660px' ) ) {
-			this.props.setLayoutFocus( 'content' );
-		}
+		this.props.selectPostRevision( selectedRevisionId );
 	},
 
 	loadRevision: function( revision ) {
@@ -373,8 +372,10 @@ export const PostEditor = createReactClass( {
 						onMoreInfoAboutEmailVerify={ this.onMoreInfoAboutEmailVerify }
 						allPostsUrl={ this.getAllPostsUrl() }
 						nestedSidebar={ this.state.nestedSidebar }
+						// @TODO "base" revision for arbitrary comparison
 						setNestedSidebar={ this.setNestedSidebar }
 						selectRevision={ this.selectRevision }
+						selectedRevisionId={ this.state.selectedRevisionId }
 						isSidebarOpened={ this.props.layoutFocus === 'sidebar' }
 					/>
 					<div className="post-editor__content">
@@ -471,6 +472,7 @@ export const PostEditor = createReactClass( {
 						savedPost={ this.state.savedPost }
 						post={ this.state.post }
 						isNew={ this.state.isNew }
+						loadRevision={ this.loadRevision }
 						onPublish={ this.onPublish }
 						onTrashingPost={ this.onTrashingPost }
 						site={ site }
@@ -481,9 +483,6 @@ export const PostEditor = createReactClass( {
 						confirmationSidebarStatus={ this.state.confirmationSidebar }
 						setNestedSidebar={ this.setNestedSidebar }
 						nestedSidebar={ this.state.nestedSidebar }
-						loadRevision={ this.loadRevision }
-						selectedRevisionId={ this.state.selectedRevisionId }
-						selectRevision={ this.selectRevision }
 					/>
 					{ this.props.isSitePreviewable ? (
 						<EditorPreview
@@ -1411,6 +1410,7 @@ export default connect(
 	dispatch => {
 		return bindActionCreators(
 			{
+				selectPostRevision,
 				setEditorLastDraft,
 				resetEditorLastDraft,
 				receivePost,

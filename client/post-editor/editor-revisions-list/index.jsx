@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { map } from 'lodash';
+import { map, noop } from 'lodash';
 
 /**
  * Internal dependencies
@@ -21,46 +21,29 @@ import { getEditedPostValue } from 'state/posts/selectors';
 import { getPostRevision, getPostRevisions, getPostRevisionsAuthorsId } from 'state/selectors';
 import { getSelectedSiteId } from 'state/ui/selectors';
 import { getEditorPostId } from 'state/ui/editor/selectors';
-import { isWithinBreakpoint } from 'lib/viewport';
+//import { isWithinBreakpoint } from 'lib/viewport';
 
 class EditorRevisionsList extends PureComponent {
+	static defaultProps = {
+		loadRevision: noop,
+	};
+
 	static propTypes = {
 		authorsIds: PropTypes.array.isRequired,
-		loadRevision: PropTypes.func.isRequired,
+		loadRevision: PropTypes.func,
+		onSelectRevision: PropTypes.func,
 		postId: PropTypes.number,
 		revisions: PropTypes.array.isRequired,
 		selectedRevision: PropTypes.object,
 		selectedRevisionId: PropTypes.number,
-		selectRevision: PropTypes.func.isRequired,
+		//		selectRevision: PropTypes.func.isRequired,
 		siteId: PropTypes.number,
 		type: PropTypes.string,
 	};
 
-	loadRevision = () => {
-		this.props.loadRevision( this.props.selectedRevision );
-	};
-
-	trySelectingRevision() {
-		if (
-			this.props.selectedRevisionId === null &&
-			this.props.revisions.length > 0 &&
-			isWithinBreakpoint( '>660px' )
-		) {
-			this.props.selectRevision( this.props.revisions[ 0 ].id );
-		}
-	}
-
-	componentWillMount() {
-		this.trySelectingRevision();
-	}
-
 	componentDidMount() {
 		// Make sure that scroll position in the editor is not preserved.
 		window.scrollTo( 0, 0 );
-	}
-
-	componentDidUpdate() {
-		this.trySelectingRevision();
 	}
 
 	render() {
@@ -73,7 +56,8 @@ class EditorRevisionsList extends PureComponent {
 				/>
 				<QueryUsers siteId={ this.props.siteId } userIds={ this.props.authorsIds } />
 				<EditorRevisionsListHeader
-					loadRevision={ this.loadRevision }
+					// @TODO move this to an action
+					loadRevision={ this.props.loadRevision }
 					selectedRevisionId={ this.props.selectedRevisionId }
 				/>
 				<div className="editor-revisions-list__scroller">
@@ -86,7 +70,7 @@ class EditorRevisionsList extends PureComponent {
 								<li className={ itemClasses } key={ revision.id }>
 									<EditorRevisionsListItem
 										revision={ revision }
-										selectRevision={ this.props.selectRevision }
+										onSelectRevision={ this.props.onSelectRevision }
 									/>
 								</li>
 							);

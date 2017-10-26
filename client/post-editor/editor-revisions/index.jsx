@@ -21,7 +21,6 @@ import { NESTED_SIDEBAR_REVISIONS } from 'post-editor/editor-sidebar/constants';
 class EditorRevisions extends Component {
 	showRevisionsNestedSidebar = () => {
 		this.trackPostRevisionsOpen();
-		this.props.selectRevision( null );
 		this.props.setNestedSidebar( NESTED_SIDEBAR_REVISIONS );
 	};
 
