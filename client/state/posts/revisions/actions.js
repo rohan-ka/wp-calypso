@@ -9,6 +9,8 @@ import {
 	POST_REVISIONS_REQUEST,
 	POST_REVISIONS_REQUEST_FAILURE,
 	POST_REVISIONS_REQUEST_SUCCESS,
+	POST_REVISIONS_SELECT,
+	POST_REVISIONS_TOGGLE_DIFF_VIEW,
 } from 'state/action-types';
 
 /**
@@ -72,9 +74,12 @@ export const receivePostRevisions = ( siteId, postId, revisions ) => ( {
 	revisions,
 } );
 
-export const selectPostRevision = ( siteId, basePostId, postId ) => ( {
-	type: 'POST_REVISIONS_SELECT',
-	basePostId,
-	siteId,
-	postId,
+export const selectPostRevision = ( fromPostId, toPostId ) => ( {
+	type: POST_REVISIONS_SELECT,
+	fromPostId,
+	toPostId,
+} );
+
+export const toggleDiffVisibility = () => ( {
+	type: POST_REVISIONS_TOGGLE_DIFF_VIEW,
 } );

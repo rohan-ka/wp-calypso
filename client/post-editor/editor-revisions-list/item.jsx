@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { localize } from 'i18n-calypso';
-import { flow, isObject } from 'lodash';
+import { flow, isObject, noop } from 'lodash';
 
 /**
  * Internal dependencies
@@ -17,9 +17,14 @@ import { selectPostRevision } from 'state/posts/revisions/actions';
 import PostTime from 'reader/post-time';
 
 class EditorRevisionsListItem extends PureComponent {
+	static defaultProps = {
+		onSelectRevision: noop,
+	};
+
 	selectRevision = () => {
-		this.props.selectPostRevision( this.props.revision.id );
-		this.props.onSelectRevision( this.props.revision.id );
+		const { basePostId, onSelectRevision, revision } = this.props;
+		this.props.selectPostRevision( basePostId, revision.id );
+		onSelectRevision( this.props.revision.id );
 	};
 
 	render() {
@@ -75,17 +80,14 @@ class EditorRevisionsListItem extends PureComponent {
 }
 
 EditorRevisionsListItem.propTypes = {
-	onSelectRevision: PropTypes.func.isRequired,
+	onSelectRevision: PropTypes.func,
 	revision: PropTypes.object.isRequired,
-	translate: PropTypes.func.isRequired,
 
 	// connected to dispatcher
 	selectPostRevision: PropTypes.func.isRequired,
+
+	// localize
+	translate: PropTypes.func.isRequired,
 };
 
-export default flow(
-	localize,
-	connect( null, dispatch => ( {
-		selectPostRevision: () => dispatch( selectPostRevision() ),
-	} ) )
-)( EditorRevisionsListItem );
+export default flow( localize, connect( null, { selectPostRevision } ) )( EditorRevisionsListItem );

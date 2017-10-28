@@ -26,16 +26,16 @@ const EditorDiffViewer = ( { revisionChanges } ) => (
 );
 
 EditorDiffViewer.propTypes = {
+	fromPostId: PropTypes.number.isRequired,
+	toPostId: PropTypes.number.isRequired,
+
+	// connected
 	revisionChanges: PropTypes.shape( {
 		title: PropTypes.array,
 		content: PropTypes.array,
 	} ).isRequired,
-	postId: PropTypes.number,
-	revision: PropTypes.object,
-	selectedRevisionId: PropTypes.number,
-	siteId: PropTypes.number,
 };
 
-export default connect( ( state, { siteId, postId, selectedRevisionId } ) => ( {
-	revisionChanges: getPostRevisionChanges( state, siteId, postId, selectedRevisionId ),
+export default connect( ( state, { fromPostId, toPostId } ) => ( {
+	revisionChanges: getPostRevisionChanges( state, null, fromPostId, toPostId ),
 } ) )( EditorDiffViewer );

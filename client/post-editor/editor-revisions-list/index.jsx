@@ -36,7 +36,6 @@ class EditorRevisionsList extends PureComponent {
 		revisions: PropTypes.array.isRequired,
 		selectedRevision: PropTypes.object,
 		selectedRevisionId: PropTypes.number,
-		//		selectRevision: PropTypes.func.isRequired,
 		siteId: PropTypes.number,
 		type: PropTypes.string,
 	};
@@ -69,8 +68,10 @@ class EditorRevisionsList extends PureComponent {
 							return (
 								<li className={ itemClasses } key={ revision.id }>
 									<EditorRevisionsListItem
+										basePostId={ this.props.postId }
 										revision={ revision }
 										onSelectRevision={ this.props.onSelectRevision }
+										siteId={ this.props.siteId }
 									/>
 								</li>
 							);

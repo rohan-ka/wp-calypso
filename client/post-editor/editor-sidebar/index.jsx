@@ -37,8 +37,6 @@ export default class EditorSidebar extends Component {
 		nestedSidebar: NestedSidebarPropType,
 		setNestedSidebar: PropTypes.func,
 		loadRevision: PropTypes.func,
-		selectedRevisionId: PropTypes.number,
-		selectRevision: PropTypes.func,
 	};
 
 	headerToggleSidebar = () => {
@@ -65,8 +63,6 @@ export default class EditorSidebar extends Component {
 			nestedSidebar,
 			setNestedSidebar,
 			loadRevision,
-			selectedRevisionId,
-			selectRevision,
 		} = this.props;
 
 		const sidebarClassNames = classNames( 'editor-sidebar', {
@@ -99,16 +95,11 @@ export default class EditorSidebar extends Component {
 						isPostPrivate={ isPostPrivate }
 						confirmationSidebarStatus={ confirmationSidebarStatus }
 						setNestedSidebar={ setNestedSidebar }
-						selectRevision={ selectRevision }
 					/>
 				</SidebarRegion>
 				<SidebarRegion className="editor-sidebar__nested-region editor-sidebar__nonscrolling-region">
 					{ nestedSidebar === NESTED_SIDEBAR_REVISIONS && (
-						<EditorRevisionsList
-							loadRevision={ loadRevision }
-							selectedRevisionId={ selectedRevisionId }
-							selectRevision={ selectRevision }
-						/>
+						<EditorRevisionsList loadRevision={ loadRevision } />
 					) }
 				</SidebarRegion>
 				<SidebarFooter>

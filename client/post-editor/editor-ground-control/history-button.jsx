@@ -12,7 +12,8 @@ import { flow } from 'lodash';
  * Internal dependencies
  */
 import { recordTracksEvent } from 'state/analytics/actions';
-import { getSelectedSiteId } from 'state/ui/selectors';
+import { toggleDiffVisibility } from 'state/posts/revisions/actions';
+import { isPostRevisionsDiffVisible } from 'state/selectors';
 import EditorRevisionsList from 'post-editor/editor-revisions-list';
 import Popover from 'components/popover';
 
@@ -23,6 +24,12 @@ class HistoryButton extends PureComponent {
 		if ( this.state.isPopoverVisible ) {
 			this.toggleShowingPopover();
 		}
+
+		if ( ! this.props.showingDiff ) {
+			this.props.toggleDiffVisibility();
+		}
+
+		// @TODO do something w/ this or don't pass it
 		revisionPostId;
 		//		console.log( 'loading: ' + revisionPostId );
 	};
@@ -39,7 +46,7 @@ class HistoryButton extends PureComponent {
 	};
 
 	render() {
-		const { selectedSiteId, translate } = this.props;
+		const { translate } = this.props;
 		return (
 			<div className="editor-ground-control__history">
 				<button
@@ -54,10 +61,7 @@ class HistoryButton extends PureComponent {
 					context={ this.refs && this.refs.historyPopoverButton }
 					onClose={ this.toggleShowingPopover }
 				>
-					<EditorRevisionsList
-						onSelectRevision={ this.onSelectRevision }
-						selectedSiteId={ selectedSiteId }
-					/>
+					<EditorRevisionsList onSelectRevision={ this.onSelectRevision } />
 				</Popover>
 			</div>
 		);
@@ -65,8 +69,12 @@ class HistoryButton extends PureComponent {
 }
 
 HistoryButton.PropTypes = {
-	// connected
-	selectedSiteId: PropTypes.number,
+	// connected to state
+	showingDiff: PropTypes.bool,
+
+	// connected to dispatch
+	recordTracksEvent: PropTypes.func,
+	toggleDiffVisibility: PropTypes.func,
 
 	// localize
 	translate: PropTypes.func,
@@ -76,8 +84,8 @@ export default flow(
 	localize,
 	connect(
 		state => ( {
-			selectedSiteId: getSelectedSiteId( state ),
+			showingDiff: isPostRevisionsDiffVisible( state ),
 		} ),
-		{ recordTracksEvent }
+		{ recordTracksEvent, toggleDiffVisibility }
 	)
 )( HistoryButton );

@@ -41,7 +41,6 @@ import analytics from 'lib/analytics';
 import { getSelectedSiteId, getSelectedSite } from 'state/ui/selectors';
 import { saveConfirmationSidebarPreference } from 'state/ui/editor/actions';
 import { setEditorLastDraft, resetEditorLastDraft } from 'state/ui/editor/last-draft/actions';
-import { selectPostRevision } from 'state/posts/revisions/actions';
 import {
 	getEditorPostId,
 	getEditorPath,
@@ -52,7 +51,13 @@ import { recordTracksEvent } from 'state/analytics/actions';
 import { editPost, receivePost, savePostSuccess } from 'state/posts/actions';
 import { getPostEdits, isEditedPostDirty } from 'state/posts/selectors';
 import { getCurrentUserId } from 'state/current-user/selectors';
-import { hasBrokenSiteUserConnection } from 'state/selectors';
+import {
+	hasBrokenSiteUserConnection,
+	editedPostHasContent,
+	isPostRevisionsDiffVisible,
+	getPostRevisionsCompareFromPostId,
+	getPostRevisionsCompareToPostId,
+} from 'state/selectors';
 import EditorConfirmationSidebar from 'post-editor/editor-confirmation-sidebar';
 import EditorDocumentHead from 'post-editor/editor-document-head';
 import EditorPostTypeUnsupported from 'post-editor/editor-post-type-unsupported';
@@ -68,7 +73,6 @@ import { protectForm } from 'lib/protect-form';
 import EditorSidebar from 'post-editor/editor-sidebar';
 import Site from 'blocks/site';
 import StatusLabel from 'post-editor/editor-status-label';
-import { editedPostHasContent } from 'state/selectors';
 import EditorGroundControl from 'post-editor/editor-ground-control';
 import { isWithinBreakpoint } from 'lib/viewport';
 import { isSitePreviewable, getSiteDomain } from 'state/sites/selectors';
@@ -289,11 +293,6 @@ export const PostEditor = createReactClass( {
 		this.setState( { nestedSidebar } );
 	},
 
-	selectRevision: function( selectedRevisionId ) {
-		this.setState( { selectedRevisionId } );
-		this.props.selectPostRevision( selectedRevisionId );
-	},
-
 	loadRevision: function( revision ) {
 		this.setNestedSidebar( NESTED_SIDEBAR_NONE );
 		this.setState( { selectedRevisionId: null } );
@@ -374,7 +373,6 @@ export const PostEditor = createReactClass( {
 						nestedSidebar={ this.state.nestedSidebar }
 						// @TODO "base" revision for arbitrary comparison
 						setNestedSidebar={ this.setNestedSidebar }
-						selectRevision={ this.selectRevision }
 						selectedRevisionId={ this.state.selectedRevisionId }
 						isSidebarOpened={ this.props.layoutFocus === 'sidebar' }
 					/>
@@ -458,11 +456,12 @@ export const PostEditor = createReactClass( {
 								/>
 								<EditorWordCount selectedText={ this.state.selectedText } />
 							</div>
-							{ this.state.nestedSidebar === NESTED_SIDEBAR_REVISIONS && (
+
+							{ this.props.revisionsDiffIsVisible &&
+							this.state.nestedSidebar === NESTED_SIDEBAR_REVISIONS && (
 								<EditorDiffViewer
-									siteId={ site.ID }
-									postId={ this.state.post.ID }
-									selectedRevisionId={ this.state.selectedRevisionId }
+									fromPostId={ this.props.revisionsCompareFromPostId }
+									toPostId={ this.props.revisionsCompareToPostId }
 								/>
 							) }
 						</div>
@@ -1392,6 +1391,9 @@ export default connect(
 		return {
 			siteId,
 			postId,
+			revisionsCompareFromPostId: getPostRevisionsCompareFromPostId( state ),
+			revisionsCompareToPostId: getPostRevisionsCompareToPostId( state ),
+			revisionsDiffIsVisible: isPostRevisionsDiffVisible( state ),
 			selectedSite: getSelectedSite( state ),
 			selectedSiteDomain: getSiteDomain( state, siteId ),
 			editorModePreference: getPreference( state, 'editor-mode' ),
@@ -1410,7 +1412,6 @@ export default connect(
 	dispatch => {
 		return bindActionCreators(
 			{
-				selectPostRevision,
 				setEditorLastDraft,
 				resetEditorLastDraft,
 				receivePost,

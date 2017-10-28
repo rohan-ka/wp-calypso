@@ -4,7 +4,7 @@
  * @format
  */
 
-import { get, head, keyBy, merge, nth } from 'lodash';
+import { keyBy, merge } from 'lodash';
 
 /**
  * Internal dependencies
@@ -14,6 +14,9 @@ import {
 	POST_REVISIONS_REQUEST,
 	POST_REVISIONS_REQUEST_FAILURE,
 	POST_REVISIONS_REQUEST_SUCCESS,
+	POST_REVISIONS_SELECT,
+	POST_REVISIONS_TOGGLE_DIFF_VIEW,
+	SELECTED_SITE_SET,
 } from 'state/action-types';
 import { combineReducers } from 'state/utils';
 
@@ -50,17 +53,27 @@ export function revisions( state = {}, action ) {
 // @TODO ensure no rehydration
 export function selection( state = {}, action ) {
 	switch ( action.type ) {
-		case 'POST_REVISIONS_SELECT': {
-			const { basePostId, siteId, postId } = action;
-
-			// @TODO use selector
-			const _revisions = get( state, 'posts.revisions.revisions', [] );
+		case SELECTED_SITE_SET: {
+			return {
+				...state,
+				fromPostId: null,
+				toPostId: null,
+				showingDiff: false,
+			};
+		}
+		case POST_REVISIONS_SELECT: {
+			const { fromPostId, toPostId } = action;
 
 			return {
 				...state,
-				basePostId: basePostId || head( _revisions ),
-				siteId,
-				postId: ( postId > basePostId && basePostId ) || nth( _revisions, 1 ),
+				fromPostId,
+				toPostId,
+			};
+		}
+		case POST_REVISIONS_TOGGLE_DIFF_VIEW: {
+			return {
+				...state,
+				showingDiff: ! state.showingDiff,
 			};
 		}
 		default:
