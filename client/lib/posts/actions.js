@@ -211,7 +211,7 @@ PostActions = {
 				}
 			);
 		} else {
-			PostActions.saveEdited( null, null, callback, { recordSaveEvent: false } );
+			PostActions.saveEdited( null, null, callback, { recordSaveEvent: false, autosave: true } );
 		}
 	},
 
@@ -300,7 +300,8 @@ PostActions = {
 	 * @param {object} options object with optional recordSaveEvent property. True if you want to record the save event.
 	 */
 	saveEdited: function( attributes, context, callback, options ) {
-		var post, postHandle, query, changedAttributes, rawContent, mode, isNew;
+		var autosave, post, postHandle, query, changedAttributes, rawContent, mode, isNew;
+		autosave = options && options.autosave ? true : false;
 
 		Dispatcher.handleViewAction( {
 			type: 'EDIT_POST',
@@ -346,6 +347,7 @@ PostActions = {
 		query = {
 			context: 'edit',
 			apiVersion: '1.2',
+			autosave: autosave,
 		};
 
 		if ( ! options || options.recordSaveEvent !== false ) {
