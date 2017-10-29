@@ -16,12 +16,18 @@ import { flow } from 'lodash';
  */
 import { isEnabled } from 'config';
 import { recordTracksEvent } from 'state/analytics/actions';
+import { toggleDiffVisibility } from 'state/posts/revisions/actions';
+import { isPostRevisionsDiffVisible } from 'state/selectors';
 import { NESTED_SIDEBAR_REVISIONS } from 'post-editor/editor-sidebar/constants';
 
 class EditorRevisions extends Component {
-	showRevisionsNestedSidebar = () => {
-		this.trackPostRevisionsOpen();
-		this.props.setNestedSidebar( NESTED_SIDEBAR_REVISIONS );
+	onButtonClick = () => {
+		const { diffIsVisible, setNestedSidebar } = this.props;
+		setNestedSidebar( NESTED_SIDEBAR_REVISIONS );
+		if ( ! diffIsVisible ) {
+			this.props.toggleDiffVisibility();
+			this.trackPostRevisionsOpen();
+		}
 	};
 
 	trackPostRevisionsOpen() {
@@ -42,7 +48,7 @@ class EditorRevisions extends Component {
 				<button
 					className="editor-revisions"
 					title={ translate( 'Open list of revisions' ) }
-					onClick={ this.showRevisionsNestedSidebar }
+					onClick={ this.onButtonClick }
 				>
 					<Gridicon icon="history" size={ 18 } />
 					{ translate( '%(revisions)d revision', '%(revisions)d revisions', {
@@ -78,7 +84,14 @@ EditorRevisions.propTypes = {
 	revisions: PropTypes.array,
 	translate: PropTypes.func,
 	setNestedSidebar: PropTypes.func.isRequired,
-	selectRevision: PropTypes.func.isRequired,
 };
 
-export default flow( localize, connect( null, { recordTracksEvent } ) )( EditorRevisions );
+export default flow(
+	localize,
+	connect(
+		state => ( {
+			diffIsVisible: isPostRevisionsDiffVisible( state ),
+		} ),
+		{ recordTracksEvent, toggleDiffVisibility }
+	)
+)( EditorRevisions );

@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { map, noop } from 'lodash';
+import { head, map, noop } from 'lodash';
 
 /**
  * Internal dependencies
@@ -21,7 +21,10 @@ import { getEditedPostValue } from 'state/posts/selectors';
 import { getPostRevision, getPostRevisions, getPostRevisionsAuthorsId } from 'state/selectors';
 import { getSelectedSiteId } from 'state/ui/selectors';
 import { getEditorPostId } from 'state/ui/editor/selectors';
-//import { isWithinBreakpoint } from 'lib/viewport';
+import { selectPostRevision } from 'state/posts/revisions/actions';
+
+// @TODO move the resonsive check to the parent
+// import { isWithinBreakpoint } from 'lib/viewport';
 
 class EditorRevisionsList extends PureComponent {
 	static defaultProps = {
@@ -40,9 +43,29 @@ class EditorRevisionsList extends PureComponent {
 		type: PropTypes.string,
 	};
 
+	trySelectingFirstRevision = () => {
+		const { postId, revisions } = this.props;
+		if ( ! revisions.length ) {
+			return;
+		}
+		const firstRevision = head( revisions );
+		if ( ! firstRevision.id ) {
+			return;
+		}
+		this.props.selectPostRevision( postId, firstRevision.id );
+	};
+
+	componentWillMount() {
+		this.trySelectingFirstRevision();
+	}
+
 	componentDidMount() {
 		// Make sure that scroll position in the editor is not preserved.
 		window.scrollTo( 0, 0 );
+	}
+
+	componentWillUpdate() {
+		this.trySelectingFirstRevision();
 	}
 
 	render() {
@@ -83,16 +106,19 @@ class EditorRevisionsList extends PureComponent {
 	}
 }
 
-export default connect( ( state, { selectedRevisionId } ) => {
-	const siteId = getSelectedSiteId( state );
-	const postId = getEditorPostId( state );
-	const type = getEditedPostValue( state, siteId, postId, 'type' );
-	return {
-		authorsIds: getPostRevisionsAuthorsId( state, siteId, postId ),
-		postId,
-		revisions: getPostRevisions( state, siteId, postId, 'display' ),
-		selectedRevision: getPostRevision( state, siteId, postId, selectedRevisionId, 'editing' ),
-		siteId,
-		type,
-	};
-} )( EditorRevisionsList );
+export default connect(
+	( state, { selectedRevisionId } ) => {
+		const siteId = getSelectedSiteId( state );
+		const postId = getEditorPostId( state );
+		const type = getEditedPostValue( state, siteId, postId, 'type' );
+		return {
+			authorsIds: getPostRevisionsAuthorsId( state, siteId, postId ),
+			postId,
+			revisions: getPostRevisions( state, siteId, postId, 'display' ),
+			selectedRevision: getPostRevision( state, siteId, postId, selectedRevisionId, 'editing' ),
+			siteId,
+			type,
+		};
+	},
+	{ selectPostRevision }
+)( EditorRevisionsList );

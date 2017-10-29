@@ -13,7 +13,8 @@ import { flow, isObject, noop } from 'lodash';
 /**
  * Internal dependencies
  */
-import { selectPostRevision } from 'state/posts/revisions/actions';
+import { selectPostRevision, toggleDiffVisibility } from 'state/posts/revisions/actions';
+import { isPostRevisionsDiffVisible } from 'state/selectors';
 import PostTime from 'reader/post-time';
 
 class EditorRevisionsListItem extends PureComponent {
@@ -22,8 +23,13 @@ class EditorRevisionsListItem extends PureComponent {
 	};
 
 	selectRevision = () => {
-		const { basePostId, onSelectRevision, revision } = this.props;
+		const { basePostId, onSelectRevision, revision, showingDiff } = this.props;
 		this.props.selectPostRevision( basePostId, revision.id );
+
+		if ( ! showingDiff ) {
+			this.props.toggleDiffVisibility();
+		}
+
 		onSelectRevision( this.props.revision.id );
 	};
 
@@ -83,6 +89,9 @@ EditorRevisionsListItem.propTypes = {
 	onSelectRevision: PropTypes.func,
 	revision: PropTypes.object.isRequired,
 
+	// connected to state
+	showingDiff: PropTypes.bool,
+
 	// connected to dispatcher
 	selectPostRevision: PropTypes.func.isRequired,
 
@@ -90,4 +99,12 @@ EditorRevisionsListItem.propTypes = {
 	translate: PropTypes.func.isRequired,
 };
 
-export default flow( localize, connect( null, { selectPostRevision } ) )( EditorRevisionsListItem );
+export default flow(
+	localize,
+	connect(
+		state => ( {
+			showingDiff: isPostRevisionsDiffVisible( state ),
+		} ),
+		{ selectPostRevision, toggleDiffVisibility }
+	)
+)( EditorRevisionsListItem );

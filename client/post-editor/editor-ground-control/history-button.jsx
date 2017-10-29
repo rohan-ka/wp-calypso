@@ -13,7 +13,6 @@ import { flow } from 'lodash';
  */
 import { recordTracksEvent } from 'state/analytics/actions';
 import { toggleDiffVisibility } from 'state/posts/revisions/actions';
-import { isPostRevisionsDiffVisible } from 'state/selectors';
 import EditorRevisionsList from 'post-editor/editor-revisions-list';
 import Popover from 'components/popover';
 
@@ -23,10 +22,6 @@ class HistoryButton extends PureComponent {
 	onSelectRevision = revisionPostId => {
 		if ( this.state.isPopoverVisible ) {
 			this.toggleShowingPopover();
-		}
-
-		if ( ! this.props.showingDiff ) {
-			this.props.toggleDiffVisibility();
 		}
 
 		// @TODO do something w/ this or don't pass it
@@ -69,9 +64,6 @@ class HistoryButton extends PureComponent {
 }
 
 HistoryButton.PropTypes = {
-	// connected to state
-	showingDiff: PropTypes.bool,
-
 	// connected to dispatch
 	recordTracksEvent: PropTypes.func,
 	toggleDiffVisibility: PropTypes.func,
@@ -80,12 +72,6 @@ HistoryButton.PropTypes = {
 	translate: PropTypes.func,
 };
 
-export default flow(
-	localize,
-	connect(
-		state => ( {
-			showingDiff: isPostRevisionsDiffVisible( state ),
-		} ),
-		{ recordTracksEvent, toggleDiffVisibility }
-	)
-)( HistoryButton );
+export default flow( localize, connect( null, { recordTracksEvent, toggleDiffVisibility } ) )(
+	HistoryButton
+);
